@@ -309,3 +309,51 @@ def skill_usage_archive_skill():
 
 def skill_usage_restore_skill():
     return get(_VENDOR_SPECS[15])
+
+
+def skill_usage_load():
+    return get(_VENDOR_SPECS[15])  # restore_skill — placeholder; not used by name
+
+
+def get_skills_dir():
+    return get(_VENDOR_SPECS[18])
+
+
+def get_all_skills_dirs():
+    return get(_VENDOR_SPECS[19])
+
+
+def iter_skill_index_files():
+    return get(_VENDOR_SPECS[20])
+
+
+def is_external_skill_path():
+    return get(_VENDOR_SPECS[21])
+
+
+def parse_qualified_name():
+    return get(_VENDOR_SPECS[22])
+
+
+def skill_matches_platform():
+    return get(_VENDOR_SPECS[23])
+
+
+def skill_matches_environment():
+    return get(_VENDOR_SPECS[24])
+
+
+def extract_skill_conditions():
+    return get(_VENDOR_SPECS[25])
+
+
+def extract_skill_config_vars():
+    return get(_VENDOR_SPECS[26])
+
+
+def get_disabled_skill_names():
+    return get(_VENDOR_SPECS[27])
+
+
+def get_external_skills_dirs():
+    return get(_VENDOR_SPECS[28])
