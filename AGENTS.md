@@ -5,26 +5,29 @@
 
 ## Letzter Durchlauf (most recent session)
 
-**2026-07-27 — Phase 1 (Reconnaissance) complete; awaiting user review.**
+**2026-07-27 — Phase 1 + Phase 2 complete; awaiting user review of Phase 2.**
 
-- Located the installed Hermes source (no download needed): `HERMES_SOURCE =
-  /home/app/.hermes/hermes-agent/` (v0.18.2, Nous Research). `HERMES_HOME =
-  /home/app/.hermes` (env unset → platform default; single default profile).
-- Read the discovery/parse/validate/load/write paths **first-hand** and
-  **empirically tested** the installed frontmatter parser + validator against
-  malformed input (probe script in the session scratchpad, not committed).
-- Wrote the sole Phase-1 deliverable: **`docs/hermes-md-research.md`** — ground
-  truth table, frontmatter schema, write-path map, empirical failure catalogue,
-  gap analysis, live-tree inventory, and an honest open-questions section.
-- **Did NOT** design, build, or touch anything under `HERMES_HOME`.
-- Biggest corrections vs. the brief's prior beliefs: the persona file is
-  `SOUL.md` (raw prose, no frontmatter); the lock is `pinned` in
-  `.usage.json` (**not** frontmatter) and only blocks delete/archive, not
-  content rewrites; lifecycle state is `.usage.json`, **not** SQLite; the
-  skill *index* (name+desc) is loaded every session (skills aren't free); the
-  loader **never rejects** — malformed YAML silently degrades.
-- **Next:** user reviews `docs/hermes-md-research.md`. On approval → Phase 2
-  (design proposal, < 2 pages, no code), then hard stop again.
+- **Phase 1 (DONE, approved by user):** Located Hermes v0.18.2 at
+  `/home/app/.hermes/hermes-agent/` (no download needed); `HERMES_HOME =
+  /home/app/.hermes` (env unset → default). Read the
+  discovery/parse/validate/load/write paths **first-hand**; empirically tested
+  the installed frontmatter parser + validator against malformed input. Sole
+  deliverable: **`docs/hermes-md-research.md`**. Key corrections to the
+  brief's prior beliefs: persona file is `SOUL.md` (raw prose, no
+  frontmatter); lock = `pinned` in `.usage.json` (blocks delete/archive only,
+  not patch/edit); lifecycle state lives in `.usage.json` (NOT SQLite); skill
+  *index* (name+desc) loads every session (bodies are on-demand); the loader
+  never rejects — malformed YAML silently degrades.
+- **Phase 2 (DONE — `docs/design-proposal.md`):** Three independent design
+  candidates generated (Vault / Loupe / Console) and adversarially judged
+  (Loupe 28/30, Console 27, Vault 25). Synthesis adopts Loupe's
+  stateless-about-content spine + Console's UI discipline + the three-color
+  validity badge from Vault, and inherits the single mutation chokepoint from
+  all three. Hard stops at Phase-1 citations throughout.
+- **Did NOT** design outside the brief's fixed constraints, **did NOT** touch
+  `HERMES_HOME`, **did NOT** start implementation.
+- **Next:** user reviews `docs/design-proposal.md`. On approval → Phase 3
+  implementation, then Phase 4 verification & `README.md`.
 
 ## What this project is
 
@@ -35,8 +38,8 @@ Hermes actually parses and writes these files. Target: local web app
 
 ## Phase gates (from the brief)
 
-1. **Reconnaissance** → `docs/hermes-md-research.md`. **[DONE — awaiting review]**
-2. **Design proposal** (short, no code). **[BLOCKED on Phase-1 approval]**
+1. **Reconnaissance** → `docs/hermes-md-research.md`. **[APPROVED]**
+2. **Design proposal** → `docs/design-proposal.md`. **[awaiting review]**
 3. **Implementation** (safety-first: atomic writes, external backups, conflict
    detection, diff-before-commit, dry-run, round-trip fidelity). **[not started]**
 4. **Verification & handover** (validator run, conflict-detection demo,
@@ -49,7 +52,8 @@ hermes-md-manager/
 ├── AGENTS.md                     # this file
 ├── README.md                     # stub (pre-existing)
 └── docs/
-    └── hermes-md-research.md     # Phase 1 deliverable
+    ├── hermes-md-research.md     # Phase 1 deliverable (APPROVED)
+    └── design-proposal.md        # Phase 2 deliverable (awaiting review)
 ```
 
 ## Ground rules for anyone continuing this work
