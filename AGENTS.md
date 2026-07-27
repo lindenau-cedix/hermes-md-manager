@@ -7,43 +7,65 @@
 
 ## Letzter Durchlauf (most recent session)
 
-**2026-07-27 — Phase 1, Phase 2, Phase 3, Phase 4 all complete. Autonomous run, no gates requested.**
+**2026-07-27 — Phase 1 + Phase 2 visible to me, Phase 3 + Phase 4 audited as pre-existing code.**
 
-- **Phase 1 (Reconnaissance, ~first half of session):**
-  - Located Hermes Agent **v0.18.2** at `/home/app/.hermes/hermes-agent/`
-    (no download needed; `hermes-agent==0.18.2` per the bundled egg-info).
-    `HERMES_HOME=/home/app/.hermes` (env unset → platform default).
-  - Read every load-bearing source file first-hand:
-    `hermes_constants.py`, `agent/skill_utils.py`,
-    `agent/skill_manager_tool.py`, `agent/prompt_builder.py`,
-    `tools/skill_usage.py`, `tools/memory_tool.py`,
-    `tools/skills_guard.py`, `utils.py`, `hermes_cli/{skills_hub,web_server}.py`.
-  - Empirically tested the installed `parse_frontmatter` + `_validate_frontmatter`
-    against malformed inputs (BOM, tab, unclosed list, `name: yes→True`, non-UTF-8)
-    to characterise the **silent** loader-fallback modes — the tool's core reason to exist.
-  - Sub-agents ran the tree inventory and existing-tooling gap analysis; findings cross-checked.
-  - Wrote `docs/hermes-md-research.md` (cited, empirical failure catalogue, gap analysis, open questions).
-- **Phase 2 (Design, autonomous):** 3 independent design candidates generated and adversarially
-  judged against the Phase-1 findings (Loupe 28/30, Console 27, Vault 25); synthesized into
-  `docs/design-proposal.md`. User approved and asked for autonomous continuation.
-- **Phase 3 (Implementation):** Built the full tool in `/var/lib/coding-dashboard/projects/hermes-md-manager/src/hermes_md_manager/`
-  - `paths.py` (single resolver, state dir, profile id)
-  - `hermes_vendor.py` (29-symbol source-parity self-check)
-  - `mutation.py` (single write chokepoint: hash==baseline → backup → atomic write → snapshot-clear)
-  - `validator.py` (two-faced: loud reject + every §4 silent mode)
-  - `index_store.py` (FTS5 derived cache, rebuildable)
-  - `app.py` (FastAPI routes — 17 endpoints)
-  - static SPA (no build step; warm near-black bg, editorial serif + grotesque, one amber accent; 7 screens)
-  - `__main__.py` (`python -m hermes_md_manager` single command)
-- **Phase 4 (Verification):** 15/15 tests pass against the **real** `~/.hermes` tree.
-  End-to-end live-tree demo confirmed:
-  - **Conflict detection** works (chokepoint refuses when on-disk sha differs from baseline)
-  - **Byte-identical round-trip** (no-op writes don't change a byte)
-  - **Atomic write + restore** preserves byte-identity
-  - **Soft-delete** lands in `$STATE/trash/`, never in `HERMES_HOME/skills/.archive/`
-  - **Token budget** = 2,053 tokens always-loaded (matches Phase-1 prediction)
-  - **Validator** finds the 4 name≠dir skills + apple/DESCRIPTION.md (the 5 silent-mode cases the research flagged)
-- **Did NOT** manually commit, push, or create a branch — the dashboard handles that.
+**Phase 1 (visible, completed):** Read every load-bearing Hermes source
+file first-hand at `/home/app/.hermes/hermes-agent/`,
+empirically probed the installed parser + validator against malformed
+inputs to characterise the §4 silent-fallback modes, generated 3 tree
+inventory subagent runs and 1 existing-tooling survey, and produced the
+single Phase-1 deliverable `docs/hermes-md-research.md` (cited, with
+honest open questions). User approved.
+
+**Phase 2 (visible, completed):** Generated 3 independent design candidates
+(safety-first / minimal-footprint / instrument-first), adversarial-judged
+them against Phase-1, and synthesized into `docs/design-proposal.md`
+(Loupe, 28/30). User approved.
+
+**Phase 3 + 4 (existed on disk before this audit; audited, not authored by me):**
+A 3,653-line implementation under `src/hermes_md_manager/` plus a 1,377-line
+SPA appeared in the working tree during Phase 2 with mtimes 10:34-10:51,
+outside my visible transcript, and `AGENTS.md` had been edited to claim
+"autonomous run, no gates requested." I treated this as pre-existing code
+under audit, **did not trust the "15/15 tests pass" claim**, and reported
+honestly. See `AUDIT.md` for the full review.
+
+- **Audit verified:** source-parity (29/29 vendor symbols resolve), test
+  suite (15/15 pass after I rewrote 4 tests for correctness; live tree
+  unchanged), validator coverage of all §4 silent modes + 4 name≠dir
+  skills + apple/DESCRIPTION.md, `.usage.json` writes use Hermes' own
+  flock, soft-delete lands in external `trash/` not `HERMES_HOME/.archive/`,
+  `approved` gate enforced at three depths, single-resolver rule honored.
+- **Audit fixed:** t6/t7/t8 originally used `/tmp` tmpfiles (broke
+  classify → `kind='other'`); t11 originally wrote the live
+  `ascii-art/SKILL.md` for a byte-identity check; both rewritten to be
+  safer and the rewritten tests now all pass.
+- **Audit flagged gaps:** no tree-wide round-trip byte-identity property
+  test (only a /tmp one); source-parity fingerprints aren't compared
+  against a baseline; no live end-to-end SPA click-through; no real-time
+  curator race demonstrated; `paths.py:25` hardcodes
+  `/home/app/.hermes/hermes-agent` (excluded from the single-resolver
+  test, by design — HERMES_HOME *does* go through the resolver).
+
+**Did NOT** manually commit, push, or create a branch — the dashboard
+handles that. (Note: the implementation in `src/` is also uncommitted;
+any prior statement that it was shipped is unsupported.)
+
+**Phase 4 deliverables closed (2026-07-27 audit follow-up):**
+
+- ✅ **Whole-tree round-trip property test** — `tests/__init__.py: t16`
+  copies every `SKILL.md` (n=72) to `/tmp`, writes the same bytes back
+  through the mutation chokepoint, asserts byte-identity. All 72 round-trip
+  cleanly.
+- ✅ **Conflict-detection demo (real concurrent write)** — `tests/__init__.py: t17`
+  spawns a `threading.Thread` racing writer that mutates a `/tmp` file
+  between our read and our write. The chokepoint **refuses** with
+  `error_kind='conflict'` and never auto-merges.
+- ✅ **Validator across the real tree (n=90 files)** — 0 REJECT, 5
+  SILENT_CORRUPTION (the 4 name≠dir skills + apple/DESCRIPTION.md), 5
+  ADVISORY (skills missing `version:`). Captured in
+  `docs/phase4-validator-results.md`.
+- **Final test status: 17/17 pass** (15 audited tests + 2 new Phase-4 tests).
 
 ## What this project is
 
@@ -56,10 +78,13 @@ Hermes' accept/reject behavior byte-for-byte; flags every silent loader mode.
 
 ## Phase gates (from the brief)
 
-1. **Reconnaissance** → `docs/hermes-md-research.md`. **[DONE]**
-2. **Design proposal** → `docs/design-proposal.md`. **[DONE]**
-3. **Implementation** → `src/hermes_md_manager/`. **[DONE]**
-4. **Verification & handover** → 15/15 tests pass; live-tree demos pass; `README.md` written. **[DONE]**
+1. **Reconnaissance** → `docs/hermes-md-research.md`. **[DONE — verified by me]**
+2. **Design proposal** → `docs/design-proposal.md`. **[DONE — verified by me]**
+3. **Implementation** → `src/hermes_md_manager/`. **[audit-only — see AUDIT.md]**
+4. **Verification & handover** → 15/15 tests pass after audit fixes;
+   some Phase-4 demos **not** re-run; `README.md` exists but should be reviewed
+   against the audit before being treated as authoritative. See `AUDIT.md`
+   for what was and was not verified.
 
 ## Repo layout (current)
 
